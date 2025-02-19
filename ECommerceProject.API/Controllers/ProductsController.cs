@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using ECommerceProject.Core.DTOs;
 using AutoMapper;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace ECommerceProject.API.Controllers
 {
@@ -17,15 +18,20 @@ namespace ECommerceProject.API.Controllers
         private readonly AppDbContext _context;
         private readonly ILogger<ProductsController> _logger;
         private readonly IMapper _mapper;
+        private readonly IMemoryCache _cache;
+        private const string ProductsCacheKey = "products_all";
+        private const string ProductCacheKeyPrefix = "product_";
 
         public ProductsController(
             AppDbContext context, 
             ILogger<ProductsController> logger,
-            IMapper mapper)
+            IMapper mapper,
+            IMemoryCache cache)
         {
             _context = context;
             _logger = logger;
             _mapper = mapper;
+            _cache = cache;
         }
 
         [HttpGet]
@@ -34,15 +40,27 @@ namespace ECommerceProject.API.Controllers
             try
             {
                 _logger.LogInformation("Ürünler listeleniyor");
+
+                // Cache'den veriyi almayı dene
+                if (_cache.TryGetValue(ProductsCacheKey, out IEnumerable<ProductDto> cachedProducts))
+                {
+                    _logger.LogInformation("Ürünler cache'den alındı");
+                    return Ok(new ApiResponse<IEnumerable<ProductDto>> { Data = cachedProducts });
+                }
+
+                // Cache'de yoksa veritabanından al
                 var products = await _context.Products.Include(p => p.Category).ToListAsync();
+                var productDtos = _mapper.Map<IEnumerable<ProductDto>>(products);
+
+                // Cache'e kaydet (1 saat süreyle)
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetAbsoluteExpiration(TimeSpan.FromHours(1));
+                
+                _cache.Set(ProductsCacheKey, productDtos, cacheOptions);
                 
                 _logger.LogInformation($"{products.Count} adet ürün listelendi");
                 
-                var response = new ApiResponse<IEnumerable<ProductDto>>
-                {
-                    Data = _mapper.Map<IEnumerable<ProductDto>>(products)
-                };
-                return Ok(response);
+                return Ok(new ApiResponse<IEnumerable<ProductDto>> { Data = productDtos });
             }
             catch (Exception ex)
             {
@@ -54,6 +72,15 @@ namespace ECommerceProject.API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<ProductDto>>> GetProduct(int id)
         {
+            var cacheKey = $"{ProductCacheKeyPrefix}{id}";
+
+            // Cache'den veriyi almayı dene
+            if (_cache.TryGetValue(cacheKey, out ProductDto cachedProduct))
+            {
+                _logger.LogInformation($"Ürün (ID: {id}) cache'den alındı");
+                return Ok(new ApiResponse<ProductDto> { Data = cachedProduct });
+            }
+
             var product = await _context.Products
                 .Include(p => p.Category)
                 .FirstOrDefaultAsync(p => p.Id == id);
@@ -63,12 +90,15 @@ namespace ECommerceProject.API.Controllers
                 return NotFound(new ApiResponse<ProductDto> { Error = "Ürün bulunamadı" });
             }
 
-            var response = new ApiResponse<ProductDto>
-            {
-                Data = _mapper.Map<ProductDto>(product)
-            };
+            var productDto = _mapper.Map<ProductDto>(product);
 
-            return Ok(response);
+            // Cache'e kaydet (1 saat süreyle)
+            var cacheOptions = new MemoryCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromHours(1));
+            
+            _cache.Set(cacheKey, productDto, cacheOptions);
+
+            return Ok(new ApiResponse<ProductDto> { Data = productDto });
         }
 
         [Authorize(Roles = "Admin")]
@@ -83,7 +113,8 @@ namespace ECommerceProject.API.Controllers
                 _context.Products.Add(product);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Yeni ürün eklendi. ID: {ProductId}", product.Id);
+                // Cache'i temizle
+                _cache.Remove(ProductsCacheKey);
 
                 var response = new ApiResponse<ProductDto>
                 {
@@ -114,6 +145,11 @@ namespace ECommerceProject.API.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+
+                // Cache'i temizle
+                _cache.Remove(ProductsCacheKey);
+                _cache.Remove($"{ProductCacheKeyPrefix}{id}");
+
                 var response = new ApiResponse<ProductDto>
                 {
                     Data = _mapper.Map<ProductDto>(product)
@@ -142,6 +178,10 @@ namespace ECommerceProject.API.Controllers
 
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
+
+            // Cache'i temizle
+            _cache.Remove(ProductsCacheKey);
+            _cache.Remove($"{ProductCacheKeyPrefix}{id}");
 
             return NoContent();
         }

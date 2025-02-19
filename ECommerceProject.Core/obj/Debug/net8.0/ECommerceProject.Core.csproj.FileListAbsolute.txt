@@ -10,3 +10,4 @@ C:\Users\Eren\Desktop\Ecommerce\ECommerceProject\ECommerceProject.Core\obj\Debug
 C:\Users\Eren\Desktop\Ecommerce\ECommerceProject\ECommerceProject.Core\obj\Debug\net8.0\ECommerceProject.Core.pdb
 C:\Users\Eren\Desktop\Ecommerce\ECommerceProject\ECommerceProject.Core\obj\Debug\net8.0\ref\ECommerceProject.Core.dll
 C:\Users\Eren\Desktop\Ecommerce\ECommerceProject\ECommerceProject.Core\obj\Debug\net8.0\ECommerceProject.Core.csproj.AssemblyReference.cache
+C:\Users\Eren\Desktop\Ecommerce\ECommerceProject\ECommerceProject.Core\obj\Debug\net8.0\ECommerceProject.Core.sourcelink.json
