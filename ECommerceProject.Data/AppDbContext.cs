@@ -14,6 +14,12 @@ namespace ECommerceProject.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Seller> Sellers { get; set; }
+        public DbSet<SellerReview> SellerReviews { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<WishlistItem> WishlistItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -46,6 +52,110 @@ namespace ECommerceProject.Data
                       .WithOne(e => e.Seller)
                       .HasForeignKey(e => e.SellerId)
                       .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<SellerReview>(entity =>
+            {
+                entity.HasOne(e => e.Seller)
+                      .WithMany()
+                      .HasForeignKey(e => e.SellerId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.User)
+                      .WithMany()
+                      .HasForeignKey(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(e => e.Rating)
+                      .IsRequired()
+                      .HasAnnotation("Range", new[] { 1, 5 });
+
+                entity.Property(e => e.Comment)
+                      .HasMaxLength(500);
+            });
+
+            modelBuilder.Entity<Order>(entity =>
+            {
+                entity.HasOne(e => e.User)
+                      .WithMany()
+                      .HasForeignKey(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(e => e.TotalAmount)
+                      .HasPrecision(18, 2);
+
+                entity.Property(e => e.Status)
+                      .IsRequired()
+                      .HasMaxLength(50);
+
+                entity.Property(e => e.PaymentStatus)
+                      .IsRequired()
+                      .HasMaxLength(50);
+            });
+
+            modelBuilder.Entity<OrderItem>(entity =>
+            {
+                entity.HasOne(e => e.Order)
+                      .WithMany(e => e.OrderItems)
+                      .HasForeignKey(e => e.OrderId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Product)
+                      .WithMany()
+                      .HasForeignKey(e => e.ProductId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Seller)
+                      .WithMany()
+                      .HasForeignKey(e => e.SellerId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(e => e.UnitPrice)
+                      .HasPrecision(18, 2);
+
+                entity.Property(e => e.Status)
+                      .IsRequired()
+                      .HasMaxLength(50);
+            });
+
+            modelBuilder.Entity<Cart>(entity =>
+            {
+                entity.HasOne(e => e.User)
+                      .WithOne()
+                      .HasForeignKey<Cart>(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<CartItem>(entity =>
+            {
+                entity.HasOne(e => e.Cart)
+                      .WithMany(e => e.Items)
+                      .HasForeignKey(e => e.CartId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Product)
+                      .WithMany()
+                      .HasForeignKey(e => e.ProductId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(e => e.UnitPrice)
+                      .HasPrecision(18, 2);
+            });
+
+            modelBuilder.Entity<WishlistItem>(entity =>
+            {
+                entity.HasOne(e => e.User)
+                      .WithMany()
+                      .HasForeignKey(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Product)
+                      .WithMany()
+                      .HasForeignKey(e => e.ProductId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                // Bir kullanıcı aynı ürünü birden fazla kez favoriye ekleyemesin
+                entity.HasIndex(e => new { e.UserId, e.ProductId }).IsUnique();
             });
         }
     }

@@ -23,6 +23,16 @@ namespace ECommerceProject.Core.Mapping
             CreateMap<CreateSellerDto, Seller>();
             CreateMap<UpdateSellerDto, Seller>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<SellerReview, SellerReviewDto>()
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName));
+
+            CreateMap<CreateSellerReviewDto, SellerReview>();
+
+            CreateMap<Order, OrderDetailsDto>();
+            CreateMap<OrderItem, OrderItemDetailsDto>()
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
+                .ForMember(dest => dest.SellerStoreName, opt => opt.MapFrom(src => src.Seller.StoreName));
         }
     }
 } 

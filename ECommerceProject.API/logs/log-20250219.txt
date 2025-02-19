@@ -60,3 +60,191 @@ ORDER BY [MigrationId];
 2025-02-19 17:39:01.382 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
 INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
 VALUES (N'20250219143852_AddSellerBulkOperations', N'8.0.11');
+2025-02-19 17:41:38.983 +03:00 [WRN] No store type was specified for the decimal property 'Price' on entity type 'Product'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-02-19 17:41:39.079 +03:00 [WRN] No store type was specified for the decimal property 'Price' on entity type 'Product'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-02-19 17:41:47.439 +03:00 [WRN] No store type was specified for the decimal property 'Price' on entity type 'Product'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-02-19 17:41:47.707 +03:00 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-02-19 17:41:47.721 +03:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2025-02-19 17:41:47.724 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-02-19 17:41:47.725 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2025-02-19 17:41:47.738 +03:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2025-02-19 17:41:47.747 +03:00 [INF] Applying migration '20250219144139_AddSellerReviews'.
+2025-02-19 17:41:47.785 +03:00 [INF] Executed DbCommand (11ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [SellerReviews] (
+    [Id] int NOT NULL IDENTITY,
+    [SellerId] int NOT NULL,
+    [UserId] nvarchar(450) NOT NULL,
+    [Rating] int NOT NULL,
+    [Comment] nvarchar(500) NOT NULL,
+    [CreatedAt] datetime2 NOT NULL,
+    [IsApproved] bit NOT NULL,
+    CONSTRAINT [PK_SellerReviews] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_SellerReviews_AspNetUsers_UserId] FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]) ON DELETE NO ACTION,
+    CONSTRAINT [FK_SellerReviews_Sellers_SellerId] FOREIGN KEY ([SellerId]) REFERENCES [Sellers] ([Id]) ON DELETE CASCADE
+);
+2025-02-19 17:41:47.789 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX [IX_SellerReviews_SellerId] ON [SellerReviews] ([SellerId]);
+2025-02-19 17:41:47.792 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX [IX_SellerReviews_UserId] ON [SellerReviews] ([UserId]);
+2025-02-19 17:41:47.795 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20250219144139_AddSellerReviews', N'8.0.11');
+2025-02-19 17:43:08.815 +03:00 [WRN] No store type was specified for the decimal property 'Price' on entity type 'Product'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-02-19 17:43:08.920 +03:00 [WRN] No store type was specified for the decimal property 'Price' on entity type 'Product'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-02-19 17:43:12.469 +03:00 [WRN] No store type was specified for the decimal property 'Price' on entity type 'Product'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-02-19 17:43:12.725 +03:00 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-02-19 17:43:12.738 +03:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2025-02-19 17:43:12.741 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-02-19 17:43:12.742 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2025-02-19 17:43:12.758 +03:00 [INF] Executed DbCommand (9ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2025-02-19 17:43:12.767 +03:00 [INF] Applying migration '20250219144309_AddOrderEntities'.
+2025-02-19 17:43:12.806 +03:00 [INF] Executed DbCommand (9ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [Orders] (
+    [Id] int NOT NULL IDENTITY,
+    [UserId] nvarchar(450) NOT NULL,
+    [OrderDate] datetime2 NOT NULL,
+    [Status] nvarchar(50) NOT NULL,
+    [TotalAmount] decimal(18,2) NOT NULL,
+    [ShippingAddress] nvarchar(max) NOT NULL,
+    [ContactPhone] nvarchar(max) NOT NULL,
+    [PaymentMethod] nvarchar(max) NOT NULL,
+    [PaymentStatus] nvarchar(50) NOT NULL,
+    CONSTRAINT [PK_Orders] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_Orders_AspNetUsers_UserId] FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]) ON DELETE NO ACTION
+);
+2025-02-19 17:43:12.813 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [OrderItems] (
+    [Id] int NOT NULL IDENTITY,
+    [OrderId] int NOT NULL,
+    [ProductId] int NOT NULL,
+    [SellerId] int NOT NULL,
+    [Quantity] int NOT NULL,
+    [UnitPrice] decimal(18,2) NOT NULL,
+    [Status] nvarchar(50) NOT NULL,
+    CONSTRAINT [PK_OrderItems] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_OrderItems_Orders_OrderId] FOREIGN KEY ([OrderId]) REFERENCES [Orders] ([Id]) ON DELETE CASCADE,
+    CONSTRAINT [FK_OrderItems_Products_ProductId] FOREIGN KEY ([ProductId]) REFERENCES [Products] ([Id]) ON DELETE NO ACTION,
+    CONSTRAINT [FK_OrderItems_Sellers_SellerId] FOREIGN KEY ([SellerId]) REFERENCES [Sellers] ([Id]) ON DELETE NO ACTION
+);
+2025-02-19 17:43:12.816 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX [IX_OrderItems_OrderId] ON [OrderItems] ([OrderId]);
+2025-02-19 17:43:12.818 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX [IX_OrderItems_ProductId] ON [OrderItems] ([ProductId]);
+2025-02-19 17:43:12.821 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX [IX_OrderItems_SellerId] ON [OrderItems] ([SellerId]);
+2025-02-19 17:43:12.823 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX [IX_Orders_UserId] ON [Orders] ([UserId]);
+2025-02-19 17:43:12.826 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20250219144309_AddOrderEntities', N'8.0.11');
+2025-02-19 17:49:17.261 +03:00 [WRN] No store type was specified for the decimal property 'Price' on entity type 'Product'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-02-19 17:49:17.369 +03:00 [WRN] No store type was specified for the decimal property 'Price' on entity type 'Product'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-02-19 17:49:25.307 +03:00 [WRN] No store type was specified for the decimal property 'Price' on entity type 'Product'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-02-19 17:49:25.579 +03:00 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-02-19 17:49:25.593 +03:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2025-02-19 17:49:25.596 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-02-19 17:49:25.598 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2025-02-19 17:49:25.612 +03:00 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2025-02-19 17:49:25.622 +03:00 [INF] Applying migration '20250219144917_AddOrderStats'.
+2025-02-19 17:49:25.648 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20250219144917_AddOrderStats', N'8.0.11');
+2025-02-19 17:51:40.764 +03:00 [WRN] No store type was specified for the decimal property 'Price' on entity type 'Product'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-02-19 17:51:40.870 +03:00 [WRN] No store type was specified for the decimal property 'Price' on entity type 'Product'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-02-19 17:51:45.254 +03:00 [WRN] No store type was specified for the decimal property 'Price' on entity type 'Product'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-02-19 17:51:45.518 +03:00 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-02-19 17:51:45.533 +03:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2025-02-19 17:51:45.536 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-02-19 17:51:45.538 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2025-02-19 17:51:45.552 +03:00 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2025-02-19 17:51:45.560 +03:00 [INF] Applying migration '20250219145141_AddCartEntities'.
+2025-02-19 17:51:45.584 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20250219145141_AddCartEntities', N'8.0.11');
+2025-02-19 17:53:56.870 +03:00 [WRN] No store type was specified for the decimal property 'Price' on entity type 'Product'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-02-19 17:53:56.978 +03:00 [WRN] No store type was specified for the decimal property 'Price' on entity type 'Product'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-02-19 17:54:05.085 +03:00 [WRN] No store type was specified for the decimal property 'Price' on entity type 'Product'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2025-02-19 17:54:05.358 +03:00 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-02-19 17:54:05.373 +03:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2025-02-19 17:54:05.377 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-02-19 17:54:05.379 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2025-02-19 17:54:05.392 +03:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2025-02-19 17:54:05.401 +03:00 [INF] Applying migration '20250219145357_AddWishlistItems'.
+2025-02-19 17:54:05.448 +03:00 [INF] Executed DbCommand (10ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [Carts] (
+    [Id] int NOT NULL IDENTITY,
+    [UserId] nvarchar(450) NOT NULL,
+    [CreatedAt] datetime2 NOT NULL,
+    [UpdatedAt] datetime2 NOT NULL,
+    CONSTRAINT [PK_Carts] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_Carts_AspNetUsers_UserId] FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]) ON DELETE CASCADE
+);
+2025-02-19 17:54:05.454 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [WishlistItems] (
+    [Id] int NOT NULL IDENTITY,
+    [UserId] nvarchar(450) NOT NULL,
+    [ProductId] int NOT NULL,
+    [AddedAt] datetime2 NOT NULL,
+    CONSTRAINT [PK_WishlistItems] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_WishlistItems_AspNetUsers_UserId] FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]) ON DELETE CASCADE,
+    CONSTRAINT [FK_WishlistItems_Products_ProductId] FOREIGN KEY ([ProductId]) REFERENCES [Products] ([Id]) ON DELETE CASCADE
+);
+2025-02-19 17:54:05.459 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [CartItems] (
+    [Id] int NOT NULL IDENTITY,
+    [CartId] int NOT NULL,
+    [ProductId] int NOT NULL,
+    [Quantity] int NOT NULL,
+    [UnitPrice] decimal(18,2) NOT NULL,
+    CONSTRAINT [PK_CartItems] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_CartItems_Carts_CartId] FOREIGN KEY ([CartId]) REFERENCES [Carts] ([Id]) ON DELETE CASCADE,
+    CONSTRAINT [FK_CartItems_Products_ProductId] FOREIGN KEY ([ProductId]) REFERENCES [Products] ([Id]) ON DELETE NO ACTION
+);
+2025-02-19 17:54:05.461 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX [IX_CartItems_CartId] ON [CartItems] ([CartId]);
+2025-02-19 17:54:05.464 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX [IX_CartItems_ProductId] ON [CartItems] ([ProductId]);
+2025-02-19 17:54:05.466 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX [IX_Carts_UserId] ON [Carts] ([UserId]);
+2025-02-19 17:54:05.468 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX [IX_WishlistItems_ProductId] ON [WishlistItems] ([ProductId]);
+2025-02-19 17:54:05.471 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX [IX_WishlistItems_UserId_ProductId] ON [WishlistItems] ([UserId], [ProductId]);
+2025-02-19 17:54:05.474 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20250219145357_AddWishlistItems', N'8.0.11');

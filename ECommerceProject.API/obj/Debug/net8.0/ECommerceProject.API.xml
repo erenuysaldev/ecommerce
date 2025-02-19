@@ -4,6 +4,56 @@
         <name>ECommerceProject.API</name>
     </assembly>
     <members>
+        <member name="M:ECommerceProject.API.Controllers.AdminController.GetPendingSellers">
+            <summary>
+            Bekleyen satıcı onaylarını listele
+            </summary>
+        </member>
+        <member name="M:ECommerceProject.API.Controllers.AdminController.GetPendingReviews">
+            <summary>
+            Bekleyen değerlendirmeleri listele
+            </summary>
+        </member>
+        <member name="M:ECommerceProject.API.Controllers.AdminController.ApproveReview(System.Int32,ECommerceProject.Core.DTOs.ApproveReviewDto)">
+            <summary>
+            Değerlendirmeyi onayla/reddet
+            </summary>
+        </member>
+        <member name="M:ECommerceProject.API.Controllers.AdminController.GetDashboardStats">
+            <summary>
+            Sistem istatistiklerini getir
+            </summary>
+        </member>
+        <member name="M:ECommerceProject.API.Controllers.OrdersController.CreateOrder(ECommerceProject.Core.DTOs.CreateOrderDto)">
+            <summary>
+            Yeni sipariş oluşturma
+            </summary>
+        </member>
+        <member name="M:ECommerceProject.API.Controllers.OrdersController.GetOrder(System.Int32)">
+            <summary>
+            Sipariş detaylarını getirme
+            </summary>
+        </member>
+        <member name="M:ECommerceProject.API.Controllers.OrdersController.GetSellerOrders(System.String)">
+            <summary>
+            Satıcının kendisine ait siparişleri listeler
+            </summary>
+        </member>
+        <member name="M:ECommerceProject.API.Controllers.OrdersController.UpdateOrderItemStatus(System.Int32,ECommerceProject.Core.DTOs.UpdateOrderItemStatusDto)">
+            <summary>
+            Satıcının sipariş durumunu güncellemesi
+            </summary>
+        </member>
+        <member name="M:ECommerceProject.API.Controllers.OrdersController.GetOrderStats(System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+            <summary>
+            Sipariş istatistiklerini getir
+            </summary>
+        </member>
+        <member name="M:ECommerceProject.API.Controllers.OrdersController.SearchOrders(ECommerceProject.Core.DTOs.OrderSearchDto)">
+            <summary>
+            Gelişmiş sipariş arama ve filtreleme
+            </summary>
+        </member>
         <member name="M:ECommerceProject.API.Controllers.ProductsController.GetProducts">
             <summary>
             Tüm ürünleri listeler
@@ -43,6 +93,26 @@
             </summary>
             <param name="dto">Güncellenecek stok bilgileri</param>
             <returns>İşlem başarı durumu</returns>
+        </member>
+        <member name="M:ECommerceProject.API.Controllers.SellersController.CreateReview(System.Int32,ECommerceProject.Core.DTOs.CreateSellerReviewDto)">
+            <summary>
+            Satıcı değerlendirmesi ekleme
+            </summary>
+        </member>
+        <member name="M:ECommerceProject.API.Controllers.SellersController.GetReviews(System.Int32)">
+            <summary>
+            Satıcı değerlendirmelerini listeleme
+            </summary>
+        </member>
+        <member name="M:ECommerceProject.API.Controllers.SellersController.GetReview(System.Int32,System.Int32)">
+            <summary>
+            Belirli bir değerlendirmeyi getir
+            </summary>
+        </member>
+        <member name="M:ECommerceProject.API.Controllers.SellersController.GetSellerReport(System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+            <summary>
+            Satıcı raporunu getir
+            </summary>
         </member>
     </members>
 </doc>

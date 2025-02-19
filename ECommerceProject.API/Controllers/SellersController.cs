@@ -299,5 +299,217 @@ namespace ECommerceProject.API.Controllers
                 });
             }
         }
+
+        /// <summary>
+        /// Satıcı değerlendirmesi ekleme
+        /// </summary>
+        [HttpPost("{sellerId}/reviews")]
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<SellerReviewDto>>> CreateReview(int sellerId, CreateSellerReviewDto dto)
+        {
+            try
+            {
+                var seller = await _context.Sellers.FindAsync(sellerId);
+                if (seller == null)
+                {
+                    return NotFound(new ApiResponse<SellerReviewDto> { Error = "Satıcı bulunamadı" });
+                }
+
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                // Kullanıcının daha önce bu satıcıyı değerlendirip değerlendirmediğini kontrol et
+                var existingReview = await _context.SellerReviews
+                    .FirstOrDefaultAsync(r => r.SellerId == sellerId && r.UserId == userId);
+
+                if (existingReview != null)
+                {
+                    return BadRequest(new ApiResponse<SellerReviewDto> 
+                    { 
+                        Error = "Bu satıcı için zaten bir değerlendirme yapmışsınız" 
+                    });
+                }
+
+                var review = new SellerReview
+                {
+                    SellerId = sellerId,
+                    UserId = userId,
+                    Rating = dto.Rating,
+                    Comment = dto.Comment,
+                    CreatedAt = DateTime.UtcNow,
+                    IsApproved = false  // Admin onayı gerekiyor
+                };
+
+                _context.SellerReviews.Add(review);
+                await _context.SaveChangesAsync();
+
+                // Satıcının ortalama puanını güncelle
+                var averageRating = await _context.SellerReviews
+                    .Where(r => r.SellerId == sellerId && r.IsApproved)
+                    .AverageAsync(r => r.Rating);
+
+                seller.Rating = (decimal)averageRating;
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction(nameof(GetReview), new { sellerId, reviewId = review.Id },
+                    new ApiResponse<SellerReviewDto> 
+                    { 
+                        Data = _mapper.Map<SellerReviewDto>(review) 
+                    });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Değerlendirme eklenirken hata oluştu");
+                return StatusCode(500, new ApiResponse<SellerReviewDto> 
+                { 
+                    Error = "Değerlendirme eklenirken bir hata oluştu" 
+                });
+            }
+        }
+
+        /// <summary>
+        /// Satıcı değerlendirmelerini listeleme
+        /// </summary>
+        [HttpGet("{sellerId}/reviews")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<SellerReviewDto>>>> GetReviews(int sellerId)
+        {
+            try
+            {
+                var reviews = await _context.SellerReviews
+                    .Include(r => r.User)
+                    .Where(r => r.SellerId == sellerId && r.IsApproved)
+                    .OrderByDescending(r => r.CreatedAt)
+                    .ToListAsync();
+
+                return Ok(new ApiResponse<IEnumerable<SellerReviewDto>>
+                {
+                    Data = _mapper.Map<IEnumerable<SellerReviewDto>>(reviews)
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Değerlendirmeler listelenirken hata oluştu");
+                return StatusCode(500, new ApiResponse<IEnumerable<SellerReviewDto>> 
+                { 
+                    Error = "Değerlendirmeler listelenirken bir hata oluştu" 
+                });
+            }
+        }
+
+        /// <summary>
+        /// Belirli bir değerlendirmeyi getir
+        /// </summary>
+        [HttpGet("{sellerId}/reviews/{reviewId}")]
+        public async Task<ActionResult<ApiResponse<SellerReviewDto>>> GetReview(int sellerId, int reviewId)
+        {
+            try
+            {
+                var review = await _context.SellerReviews
+                    .Include(r => r.User)
+                    .FirstOrDefaultAsync(r => r.SellerId == sellerId && r.Id == reviewId && r.IsApproved);
+
+                if (review == null)
+                {
+                    return NotFound(new ApiResponse<SellerReviewDto> { Error = "Değerlendirme bulunamadı" });
+                }
+
+                return Ok(new ApiResponse<SellerReviewDto>
+                {
+                    Data = _mapper.Map<SellerReviewDto>(review)
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Değerlendirme getirilirken hata oluştu");
+                return StatusCode(500, new ApiResponse<SellerReviewDto> 
+                { 
+                    Error = "Değerlendirme getirilirken bir hata oluştu" 
+                });
+            }
+        }
+
+        /// <summary>
+        /// Satıcı raporunu getir
+        /// </summary>
+        [HttpGet("reports")]
+        [Authorize(Roles = "Seller")]
+        public async Task<ActionResult<ApiResponse<SellerReportDto>>> GetSellerReport([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var seller = await _context.Sellers
+                    .FirstOrDefaultAsync(s => s.UserId == userId);
+
+                if (seller == null)
+                {
+                    return NotFound(new ApiResponse<SellerReportDto> 
+                    { 
+                        Error = "Satıcı profili bulunamadı" 
+                    });
+                }
+
+                // Tarih aralığını ayarla
+                var start = startDate ?? DateTime.UtcNow.AddDays(-30);
+                var end = endDate ?? DateTime.UtcNow;
+
+                // Sipariş kalemlerini getir
+                var orderItems = await _context.OrderItems
+                    .Include(i => i.Order)
+                    .Include(i => i.Product)
+                    .Where(i => i.SellerId == seller.Id 
+                            && i.Order.OrderDate >= start 
+                            && i.Order.OrderDate <= end)
+                    .ToListAsync();
+
+                var report = new SellerReportDto
+                {
+                    TotalRevenue = orderItems.Sum(i => i.UnitPrice * i.Quantity),
+                    TotalOrders = orderItems.Select(i => i.OrderId).Distinct().Count(),
+                    CompletedOrders = orderItems.Where(i => i.Status == "Delivered")
+                                          .Select(i => i.OrderId)
+                                          .Distinct()
+                                          .Count(),
+                    PendingOrders = orderItems.Where(i => i.Status == "Pending")
+                                         .Select(i => i.OrderId)
+                                         .Distinct()
+                                         .Count(),
+                    TopProducts = orderItems.GroupBy(i => new { i.ProductId, i.Product.Name })
+                                          .Select(g => new TopProductDto
+                                          {
+                                              ProductId = g.Key.ProductId,
+                                              ProductName = g.Key.Name,
+                                              TotalSales = g.Sum(i => i.Quantity),
+                                              Revenue = g.Sum(i => i.UnitPrice * i.Quantity)
+                                          })
+                                          .OrderByDescending(p => p.Revenue)
+                                          .Take(5)
+                                          .ToList(),
+                    DailyRevenue = orderItems.GroupBy(i => i.Order.OrderDate.Date)
+                                         .Select(g => new DailyRevenueDto
+                                         {
+                                             Date = g.Key,
+                                             Revenue = g.Sum(i => i.UnitPrice * i.Quantity),
+                                             OrderCount = g.Select(i => i.OrderId).Distinct().Count()
+                                         })
+                                         .OrderBy(d => d.Date)
+                                         .ToList()
+                };
+
+                if (report.TotalOrders > 0)
+                {
+                    report.AverageOrderValue = report.TotalRevenue / report.TotalOrders;
+                }
+
+                return Ok(new ApiResponse<SellerReportDto> { Data = report });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Satıcı raporu oluşturulurken hata oluştu");
+                return StatusCode(500, new ApiResponse<SellerReportDto> 
+                { 
+                    Error = "Satıcı raporu oluşturulurken bir hata oluştu" 
+                });
+            }
+        }
     }
 } 
