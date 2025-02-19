@@ -17,6 +17,12 @@ namespace ECommerceProject.Core.Mapping
             CreateMap<Category, CategoryDto>();
             CreateMap<CreateCategoryDto, Category>();
             CreateMap<UpdateCategoryDto, Category>();
+
+            // Seller mappings
+            CreateMap<Seller, SellerDto>();
+            CreateMap<CreateSellerDto, Seller>();
+            CreateMap<UpdateSellerDto, Seller>()
+                .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
         }
     }
 } 

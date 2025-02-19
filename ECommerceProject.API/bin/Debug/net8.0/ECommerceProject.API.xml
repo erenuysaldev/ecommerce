@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ECommerceProject.API</name>
+    </assembly>
+    <members>
+        <member name="M:ECommerceProject.API.Controllers.ProductsController.GetProducts">
+            <summary>
+            Tüm ürünleri listeler
+            </summary>
+            <returns>Ürün listesi</returns>
+            <response code="200">Ürünler başarıyla listelendi</response>
+            <response code="401">Yetkilendirme hatası</response>
+        </member>
+        <member name="M:ECommerceProject.API.Controllers.ProductsController.GetProduct(System.Int32)">
+            <summary>
+            ID'ye göre ürün getirir
+            </summary>
+            <param name="id">Ürün ID</param>
+            <returns>Ürün detayı</returns>
+            <response code="200">Ürün başarıyla getirildi</response>
+            <response code="404">Ürün bulunamadı</response>
+        </member>
+        <member name="M:ECommerceProject.API.Controllers.ProductsController.CreateProduct(ECommerceProject.Core.DTOs.CreateProductDto)">
+            <summary>
+            Yeni ürün ekler
+            </summary>
+            <param name="productDto">Ürün bilgileri</param>
+            <returns>Eklenen ürün</returns>
+            <response code="201">Ürün başarıyla eklendi</response>
+            <response code="400">Geçersiz istek</response>
+        </member>
+        <member name="M:ECommerceProject.API.Controllers.SellersController.BulkCreateProducts(ECommerceProject.Core.DTOs.BulkCreateProductDto)">
+            <summary>
+            Toplu ürün ekleme işlemi yapar
+            </summary>
+            <param name="dto">Eklenecek ürünlerin listesi</param>
+            <returns>Eklenen ürünlerin listesi</returns>
+        </member>
+        <member name="M:ECommerceProject.API.Controllers.SellersController.BulkUpdateStock(ECommerceProject.Core.DTOs.BulkUpdateStockDto)">
+            <summary>
+            Toplu stok güncelleme işlemi yapar
+            </summary>
+            <param name="dto">Güncellenecek stok bilgileri</param>
+            <returns>İşlem başarı durumu</returns>
+        </member>
+    </members>
+</doc>

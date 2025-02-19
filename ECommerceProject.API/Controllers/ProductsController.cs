@@ -7,12 +7,14 @@ using Microsoft.Extensions.Logging;
 using ECommerceProject.Core.DTOs;
 using AutoMapper;
 using Microsoft.Extensions.Caching.Memory;
+using System.Security.Claims;
 
 namespace ECommerceProject.API.Controllers
 {
     [Authorize]
-    [ApiController]
+    [Produces("application/json")]
     [Route("api/[controller]")]
+    [ApiController]
     public class ProductsController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -34,7 +36,15 @@ namespace ECommerceProject.API.Controllers
             _cache = cache;
         }
 
+        /// <summary>
+        /// Tüm ürünleri listeler
+        /// </summary>
+        /// <returns>Ürün listesi</returns>
+        /// <response code="200">Ürünler başarıyla listelendi</response>
+        /// <response code="401">Yetkilendirme hatası</response>
         [HttpGet]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<ProductDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<IEnumerable<ProductDto>>>> GetProducts()
         {
             try
@@ -69,7 +79,16 @@ namespace ECommerceProject.API.Controllers
             }
         }
 
+        /// <summary>
+        /// ID'ye göre ürün getirir
+        /// </summary>
+        /// <param name="id">Ürün ID</param>
+        /// <returns>Ürün detayı</returns>
+        /// <response code="200">Ürün başarıyla getirildi</response>
+        /// <response code="404">Ürün bulunamadı</response>
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(ApiResponse<ProductDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<ProductDto>>> GetProduct(int id)
         {
             var cacheKey = $"{ProductCacheKeyPrefix}{id}";
@@ -101,89 +120,144 @@ namespace ECommerceProject.API.Controllers
             return Ok(new ApiResponse<ProductDto> { Data = productDto });
         }
 
-        [Authorize(Roles = "Admin")]
+        /// <summary>
+        /// Yeni ürün ekler
+        /// </summary>
+        /// <param name="productDto">Ürün bilgileri</param>
+        /// <returns>Eklenen ürün</returns>
+        /// <response code="201">Ürün başarıyla eklendi</response>
+        /// <response code="400">Geçersiz istek</response>
         [HttpPost]
+        [Authorize(Roles = "Seller,Admin")]
+        [ProducesResponseType(typeof(ApiResponse<ProductDto>), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<ApiResponse<ProductDto>>> CreateProduct(CreateProductDto productDto)
         {
             try
             {
-                _logger.LogInformation("Yeni ürün ekleniyor: {@ProductDto}", productDto);
-                
+                // Satıcı kontrolü
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var seller = await _context.Sellers
+                    .FirstOrDefaultAsync(s => s.UserId == userId && s.IsApproved);
+
+                if (seller == null && !User.IsInRole("Admin"))
+                {
+                    return BadRequest(new ApiResponse<ProductDto> 
+                    { 
+                        Error = "Onaylanmış bir satıcı hesabınız olmalıdır" 
+                    });
+                }
+
                 var product = _mapper.Map<Product>(productDto);
+                
+                if (!User.IsInRole("Admin"))
+                {
+                    product.SellerId = seller.Id;
+                }
+
                 _context.Products.Add(product);
                 await _context.SaveChangesAsync();
 
-                // Cache'i temizle
-                _cache.Remove(ProductsCacheKey);
+                var productToReturn = await _context.Products
+                    .Include(p => p.Category)
+                    .FirstOrDefaultAsync(p => p.Id == product.Id);
 
-                var response = new ApiResponse<ProductDto>
-                {
-                    Data = _mapper.Map<ProductDto>(product)
-                };
-
-                return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, response);
+                return CreatedAtAction(nameof(GetProduct), 
+                    new { id = product.Id }, 
+                    new ApiResponse<ProductDto> 
+                    { 
+                        Data = _mapper.Map<ProductDto>(productToReturn) 
+                    });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ürün eklenirken hata oluştu: {@ProductDto}", productDto);
-                throw;
+                _logger.LogError(ex, "Ürün oluşturulurken hata oluştu");
+                return StatusCode(500, new ApiResponse<ProductDto> 
+                { 
+                    Error = "Ürün oluşturulurken bir hata oluştu" 
+                });
             }
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
+        [Authorize(Roles = "Seller,Admin")]
         public async Task<ActionResult<ApiResponse<ProductDto>>> UpdateProduct(int id, UpdateProductDto productDto)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
-            {
-                return NotFound(new ApiResponse<ProductDto> { Error = "Ürün bulunamadı" });
-            }
-
-            _mapper.Map(productDto, product);
-
             try
             {
-                await _context.SaveChangesAsync();
+                var product = await _context.Products
+                    .Include(p => p.Seller)
+                    .FirstOrDefaultAsync(p => p.Id == id);
 
-                // Cache'i temizle
-                _cache.Remove(ProductsCacheKey);
-                _cache.Remove($"{ProductCacheKeyPrefix}{id}");
-
-                var response = new ApiResponse<ProductDto>
-                {
-                    Data = _mapper.Map<ProductDto>(product)
-                };
-                return Ok(response);
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProductExists(id))
+                if (product == null)
                 {
                     return NotFound(new ApiResponse<ProductDto> { Error = "Ürün bulunamadı" });
                 }
-                throw;
+
+                // Sadece ürünün satıcısı veya admin güncelleyebilir
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (product.Seller?.UserId != userId && !User.IsInRole("Admin"))
+                {
+                    return Forbid();
+                }
+
+                _mapper.Map(productDto, product);
+                await _context.SaveChangesAsync();
+
+                var updatedProduct = await _context.Products
+                    .Include(p => p.Category)
+                    .FirstOrDefaultAsync(p => p.Id == id);
+
+                return Ok(new ApiResponse<ProductDto> 
+                { 
+                    Data = _mapper.Map<ProductDto>(updatedProduct) 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ürün güncellenirken hata oluştu");
+                return StatusCode(500, new ApiResponse<ProductDto> 
+                { 
+                    Error = "Ürün güncellenirken bir hata oluştu" 
+                });
             }
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProduct(int id)
+        [Authorize(Roles = "Seller,Admin")]
+        public async Task<ActionResult<ApiResponse<bool>>> DeleteProduct(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            try
             {
-                return NotFound();
+                var product = await _context.Products
+                    .Include(p => p.Seller)
+                    .FirstOrDefaultAsync(p => p.Id == id);
+
+                if (product == null)
+                {
+                    return NotFound(new ApiResponse<bool> { Error = "Ürün bulunamadı" });
+                }
+
+                // Sadece ürünün satıcısı veya admin silebilir
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (product.Seller?.UserId != userId && !User.IsInRole("Admin"))
+                {
+                    return Forbid();
+                }
+
+                _context.Products.Remove(product);
+                await _context.SaveChangesAsync();
+
+                return Ok(new ApiResponse<bool> { Data = true });
             }
-
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
-
-            // Cache'i temizle
-            _cache.Remove(ProductsCacheKey);
-            _cache.Remove($"{ProductCacheKeyPrefix}{id}");
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ürün silinirken hata oluştu");
+                return StatusCode(500, new ApiResponse<bool> 
+                { 
+                    Error = "Ürün silinirken bir hata oluştu" 
+                });
+            }
         }
 
         private bool ProductExists(int id)

@@ -8,6 +8,7 @@ using System.Text;
 using ECommerceProject.Core.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Logging;
 
 namespace ECommerceProject.API.Controllers
 {
@@ -18,15 +19,18 @@ namespace ECommerceProject.API.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly JwtConfig _jwtConfig;
+        private readonly ILogger<AuthController> _logger;
 
         public AuthController(
             UserManager<ApplicationUser> userManager, 
             SignInManager<ApplicationUser> signInManager,
-            IOptions<JwtConfig> jwtConfig)
+            IOptions<JwtConfig> jwtConfig,
+            ILogger<AuthController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _jwtConfig = jwtConfig.Value;
+            _logger = logger;
         }
 
         [HttpPost("register")]
@@ -73,6 +77,57 @@ namespace ECommerceProject.API.Controllers
             }
 
             return BadRequest("Giriş başarısız");
+        }
+
+        [HttpPost("register-seller")]
+        public async Task<ActionResult<ApiResponse<AuthResponseDto>>> RegisterSeller(RegisterDto registerDto)
+        {
+            try
+            {
+                // Kullanıcıyı oluştur
+                var user = new ApplicationUser
+                {
+                    UserName = registerDto.Email,
+                    Email = registerDto.Email,
+                    FirstName = registerDto.FirstName,
+                    LastName = registerDto.LastName
+                };
+
+                var result = await _userManager.CreateAsync(user, registerDto.Password);
+
+                if (result.Succeeded)
+                {
+                    // Seller rolünü ekle
+                    await _userManager.AddToRoleAsync(user, "Seller");
+
+                    // Token oluştur
+                    var token = await GenerateJwtToken(user);
+
+                    return Ok(new ApiResponse<AuthResponseDto>
+                    {
+                        Data = new AuthResponseDto
+                        {
+                            Token = token,
+                            Email = user.Email,
+                            FirstName = user.FirstName,
+                            LastName = user.LastName
+                        }
+                    });
+                }
+
+                return BadRequest(new ApiResponse<AuthResponseDto>
+                {
+                    Error = "Kullanıcı oluşturulurken hata oluştu: " + string.Join(", ", result.Errors.Select(e => e.Description))
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Satıcı kaydı sırasında hata oluştu");
+                return StatusCode(500, new ApiResponse<AuthResponseDto>
+                {
+                    Error = "Satıcı kaydı sırasında bir hata oluştu"
+                });
+            }
         }
 
         private async Task<string> GenerateJwtToken(ApplicationUser user)

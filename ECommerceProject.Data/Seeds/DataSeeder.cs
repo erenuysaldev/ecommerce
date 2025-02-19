@@ -18,6 +18,12 @@ namespace ECommerceProject.Data.Seeds
                 await roleManager.CreateAsync(new IdentityRole("User"));
             }
 
+            // Seller rolünü ekle
+            if (!await roleManager.RoleExistsAsync("Seller"))
+            {
+                await roleManager.CreateAsync(new IdentityRole("Seller"));
+            }
+
             // Admin kullanıcısını oluştur
             if (await userManager.FindByEmailAsync("admin@example.com") == null)
             {

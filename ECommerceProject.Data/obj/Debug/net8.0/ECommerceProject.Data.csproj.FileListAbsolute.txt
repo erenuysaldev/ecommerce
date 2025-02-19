@@ -15,3 +15,4 @@ C:\Users\Eren\Desktop\Ecommerce\ECommerceProject\ECommerceProject.Data\obj\Debug
 C:\Users\Eren\Desktop\Ecommerce\ECommerceProject\ECommerceProject.Data\obj\Debug\net8.0\ECommerceProject.Data.pdb
 C:\Users\Eren\Desktop\Ecommerce\ECommerceProject\ECommerceProject.Data\obj\Debug\net8.0\ECommerceProject.Data.genruntimeconfig.cache
 C:\Users\Eren\Desktop\Ecommerce\ECommerceProject\ECommerceProject.Data\obj\Debug\net8.0\ref\ECommerceProject.Data.dll
+C:\Users\Eren\Desktop\Ecommerce\ECommerceProject\ECommerceProject.Data\obj\Debug\net8.0\ECommerceProject.Data.sourcelink.json

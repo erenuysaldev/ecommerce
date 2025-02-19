@@ -15,3 +15,4 @@ C:\Users\Eren\Desktop\Ecommerce\ECommerceProject\ECommerceProject.Service\obj\De
 C:\Users\Eren\Desktop\Ecommerce\ECommerceProject\ECommerceProject.Service\obj\Debug\net8.0\refint\ECommerceProject.Service.dll
 C:\Users\Eren\Desktop\Ecommerce\ECommerceProject\ECommerceProject.Service\obj\Debug\net8.0\ECommerceProject.Service.pdb
 C:\Users\Eren\Desktop\Ecommerce\ECommerceProject\ECommerceProject.Service\obj\Debug\net8.0\ref\ECommerceProject.Service.dll
+C:\Users\Eren\Desktop\Ecommerce\ECommerceProject\ECommerceProject.Service\obj\Debug\net8.0\ECommerceProject.Service.sourcelink.json
